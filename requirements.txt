@@ -1,0 +1,12 @@
+Click==7.0
+Flask==1.0.2
+imageio==2.5.0
+numpy==1.16.2
+opencv-python==4.0.1.23
+pandas==0.24.2
+requests==2.21.0
+scipy==1.2.1
+Shapely==1.6.4.post2
+tensorflow==1.13.1
+tqdm==4.31.1
+uuid==1.30
