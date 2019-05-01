@@ -145,4 +145,4 @@ def api_process(filename_image: str, h: int, w: int, resizing: bool):
                                    original_shape=(h, w)))
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0')
