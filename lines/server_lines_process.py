@@ -146,7 +146,7 @@ def api_process(filename_image: str, h: int, w: int, resizing: bool):
 
 
 @app.route('/processfile', methods=['POST'])
-def api_process():
+def api_processfile():
 
     data = request.data
     filename_image = data.filename
