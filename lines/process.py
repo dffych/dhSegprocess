@@ -274,7 +274,7 @@ def vectorization(probability_maps: np.array) -> (List[np.array], List[np.array]
     mask_lines = lines_binarization(probability_maps[:, :, 2])
 
     baselines = line_vectorization.find_lines(mask_baselines)
-    _, contours_lines, _ = cv2.findContours(mask_lines, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours_lines, _ = cv2.findContours(mask_lines, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     return baselines, contours_lines
 
