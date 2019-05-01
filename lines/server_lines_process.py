@@ -6,6 +6,7 @@ from flask import Flask, request, jsonify
 import cv2
 import numpy as np
 import io
+import pprint
 import json
 from process import vectorization, create_page_region_with_lines, assign_baseline_to_lines,\
     generate_text_lines_regions_from_baselines, generate_text_lines_regions_from_lines, page_jsonify
@@ -148,7 +149,8 @@ def api_process(filename_image: str, h: int, w: int, resizing: bool):
 @app.route('/processfile', methods=['POST'])
 def api_processfile():
 
-    data = request.data
+    data = request.get_json()
+    pprint(data)
     filename_image = data.filename
     h = data.h
     w = data.w
