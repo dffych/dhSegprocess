@@ -6,7 +6,7 @@ from flask import Flask, request, jsonify
 import cv2
 import numpy as np
 import io
-import pprint
+from pprint import pprint
 import json
 from process import vectorization, create_page_region_with_lines, assign_baseline_to_lines,\
     generate_text_lines_regions_from_baselines, generate_text_lines_regions_from_lines, page_jsonify
@@ -150,20 +150,19 @@ def api_process(filename_image: str, h: int, w: int, resizing: bool):
 def api_processfile():
 
     data = request.get_json()
-    pprint(data)
-    filename_image = data.filename
-    h = data.h
-    w = data.w
-    resizing = data.resizing
+    filename_image = data["filename"]
+    h = data["h"]
+    w = data["w"]
+    resizing = data["resizing"]
     
     with open(filename_image, 'r') as infile:
         data = json.load(infile)
 
     buf = io.BytesIO()
     np.save(buf, data["outputs"]["probs"])
-    probs = buf.getvalue()
+    dt = buf.getvalue()
     
-    #probs = np.load(io.BytesIO(data))
+    probs = np.load(io.BytesIO(dt))
 
     if probs.shape[0] == 1:
         probs = probs[0, :, :, :]
@@ -200,10 +199,13 @@ def api_processfile():
     else:
         list_text_lines = list()
 
-    return json.dumps(page_jsonify(image_filename=filename_image,
+    newfilename = filename_image+".lines"
+    with open(newfilename, 'w') as outfile:
+        json.dump(page_jsonify(image_filename=filename_image,
                                    list_text_lines=list_text_lines,
-                                   original_shape=(h, w)),filename_image+".lines")
+                                   original_shape=(h, w)),outfile)
 
+    return "ok"
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
