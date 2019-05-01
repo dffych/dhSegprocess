@@ -144,5 +144,64 @@ def api_process(filename_image: str, h: int, w: int, resizing: bool):
                                    list_text_lines=list_text_lines,
                                    original_shape=(h, w)))
 
+
+@app.route('/processfile', methods=['POST'])
+def api_process():
+
+    data = request.data
+    filename_image = data.filename
+    h = data.h
+    w = data.w
+    resizing = data.resizing
+    
+    with open(filename_image, 'r') as infile:
+        data = json.load(infile)
+
+    buf = io.BytesIO()
+    np.save(buf, data["outputs"]["probs"])
+    probs = buf.getvalue()
+    
+    #probs = np.load(io.BytesIO(data))
+
+    if probs.shape[0] == 1:
+        probs = probs[0, :, :, :]
+
+    if resizing in ['true', 'TRUE', 'True']:
+        resized_probs = cv2.resize(np.squeeze(probs), tuple((w, h)))
+
+        baselines, contours_lines = vectorization(resized_probs)
+
+        baselines = [bl[:, 0, :].tolist() for bl in baselines]
+        contours_lines = [line[:, 0, :].tolist() for line in contours_lines]
+
+    elif resizing in ['false', 'FALSE', 'False']:
+        baselines, contours_lines = vectorization(probs)
+
+        # Upscale coordinates
+        baselines = [resize_image_coordinates(bl[:, 0, :], probs.shape[:2], (h, w)).tolist() for bl in baselines]
+        contours_lines = [resize_image_coordinates(line[:, 0, :], probs.shape[:2], (h, w)).tolist() for line in
+                          contours_lines]
+
+    else:
+        raise NotImplementedError('The is no option {} availbale for resizing parameter '
+                                  '(use "true" or "false")'.format(resizing))
+
+    baselines = [np.array(baseline) for baseline in baselines]
+    contours_lines = [np.array(line) for line in contours_lines]
+
+    if baselines is not None and contours_lines is not None:
+        list_text_lines = assign_baseline_to_lines(baselines, contours_lines)
+    elif baselines is None and contours_lines is not None:
+        list_text_lines = generate_text_lines_regions_from_lines(contours_lines)
+    elif baselines is not None and contours_lines is None:
+        list_text_lines = generate_text_lines_regions_from_baselines(baselines)
+    else:
+        list_text_lines = list()
+
+    return json.dumps(page_jsonify(image_filename=filename_image,
+                                   list_text_lines=list_text_lines,
+                                   original_shape=(h, w)),filename_image+".lines")
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
