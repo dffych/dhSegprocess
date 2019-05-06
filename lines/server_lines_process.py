@@ -151,17 +151,18 @@ def api_processfile():
 
     data = request.get_json()
     filename_image = data["filename"]
-    h = data["h"]
-    w = data["w"]
     resizing = data["resizing"]
-    
+
     with open(filename_image, 'r') as infile:
         data = json.load(infile)
+
+
+    h, w = data["outputs"]["original_shape"]
 
     buf = io.BytesIO()
     np.save(buf, data["outputs"]["probs"])
     dt = buf.getvalue()
-    
+
     probs = np.load(io.BytesIO(dt))
 
     if probs.shape[0] == 1:
