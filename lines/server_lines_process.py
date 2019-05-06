@@ -6,7 +6,6 @@ from flask import Flask, request, jsonify
 import cv2
 import numpy as np
 import io
-from pprint import pprint
 import json
 from process import vectorization, create_page_region_with_lines, assign_baseline_to_lines,\
     generate_text_lines_regions_from_baselines, generate_text_lines_regions_from_lines, page_jsonify
